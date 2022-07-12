@@ -10,18 +10,20 @@ module SiteImpact
     class Base
 
       def initialize(base_url:, **params)
-        @url = base_url
+        @base_url = base_url.chomp("/")
       end
 
       def execute(method:, endpoint:, payload: {})
-        headers = @headers
+        headers = api_headers
         headers[:params] = payload[:params] if payload.include? :params
-        url = "#{@base_url}/#{endpoint}"
+        url = "#{@base_url}/#{endpoint.delete_prefix('/')}"
         request_options = {method: method, url: url, headers: headers}
         if [:post, :put].include? method
           payload.delete :params
           request_options[:payload] = payload.to_json
         end
+        puts "URL: #{url}"
+        puts request_options.inspect
         response = ::RestClient::Request.execute(request_options)
         body = JSON.parse(response, symbolize_names: true)
 
@@ -52,7 +54,7 @@ module SiteImpact
 
       private
 
-      def headers
+      def api_headers
         raise NotImplementedError, 'Provide header method in child class'
       end
     end

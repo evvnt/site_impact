@@ -10,7 +10,7 @@ module SiteImpact
 
       private
 
-      def headers
+      def api_headers
         {
           "api-key" => SiteImpact.orders_api_key,
           "Content-Type" => "application/json",

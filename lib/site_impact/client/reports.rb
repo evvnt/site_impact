@@ -10,7 +10,7 @@ module SiteImpact
 
       private
 
-      def headers
+      def api_headers
         {}
       end
 

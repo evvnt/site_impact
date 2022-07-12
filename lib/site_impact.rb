@@ -5,6 +5,7 @@ require "forwardable"
 
 require "site_impact/version"
 require "site_impact/configuration"
+require "site_impact/clients"
 require "site_impact/resources"
 
 module SiteImpact
