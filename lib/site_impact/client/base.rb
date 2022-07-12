@@ -13,21 +13,33 @@ module SiteImpact
         @base_url = base_url.chomp("/")
       end
 
-      def execute(method:, endpoint:, payload: {})
-        headers = api_headers
+      def execute(method:, endpoint:, payload: {}, headers: nil)
+        response = nil
+        headers = headers || api_headers
         headers[:params] = payload[:params] if payload.include? :params
         url = "#{@base_url}/#{endpoint.delete_prefix('/')}"
-        request_options = {method: method, url: url, headers: headers}
+        request_options = {method: method,
+                           url: url,
+                           headers: headers,
+                           read_timeout: SiteImpact.config.read_timeout,
+                           open_timeout: SiteImpact.config.open_timeout}
         if [:post, :put].include? method
           payload.delete :params
           request_options[:payload] = payload.to_json
         end
-        puts "URL: #{url}"
-        puts request_options.inspect
-        response = ::RestClient::Request.execute(request_options)
-        body = JSON.parse(response, symbolize_names: true)
+        puts "SiteImpact -- URL: #{url}, Request: #{request_options.inspect}" if SiteImpact.config.debug
 
-        unless body[:success]
+        begin
+          response = ::RestClient::Request.execute(request_options)
+        rescue ::RestClient::ExceptionWithResponse => e
+          raise SiteImpact::ConnectionError.new(e.message, self)
+        end
+
+        body = JSON.parse(response, symbolize_names: true)
+        puts "SiteImpact -- Response: #{body.inspect}" if SiteImpact.config.debug
+
+        # TODO: Create consistent response objects for each API
+        if body.is_a?(Hash) && body.has_key?(:success) && body[:success] == false
           message = "Unable to #{method.to_s.upcase} to endpoint: #{endpoint}. #{body[:errors]}"
           raise SiteImpact::ConnectionError.new(message, self)
         end

@@ -13,21 +13,23 @@ module SiteImpact
     attr_accessor :orders_test_tracking_link_id
     attr_accessor :orders_opt_out_id
 
-
     # Counts
     attr_accessor :counts_api_key
     attr_accessor :counts_base_url
+    attr_accessor :counts_username
+    attr_accessor :counts_password
+    attr_accessor :counts_client_id
+    attr_accessor :counts_client_secret
+    attr_accessor :counts_max_radius
 
     #Reports
     attr_accessor :reports_base_url
     attr_accessor :reports_api_key
 
-    attr_reader :max_network_retries
-    attr_reader :initial_network_retry_delay
-    attr_reader :max_network_retry_delay
     attr_reader :open_timeout
     attr_reader :read_timeout
-    attr_reader :write_timeout
+    attr_accessor :debug
+
 
     def self.setup
       new.tap do |instance|
@@ -37,31 +39,18 @@ module SiteImpact
 
 
     def initialize
-      @max_network_retries = 0
-      @initial_network_retry_delay = 0.5
-      @max_network_retry_delay = 2
-
       @open_timeout = 30
       @read_timeout = 80
-      @write_timeout = 30
+      @debug = false
 
       @orders_base_url = 'https://oms.siteimpact.com/api/v2/'
       @counts_base_url = 'https://counts.siteimpact.com/'
       @reports_base_url = 'http://ecampaignstats.com/cp/index.php/report_api?WSDL'
+
+      # Max radius around a zip supported by Site Impact
+      @counts_max_radius = 200
     end
 
-    # TODO: May not use these config items?
-    def max_network_retries=(val)
-      @max_network_retries = val.to_i
-    end
-
-    def max_network_retry_delay=(val)
-      @max_network_retry_delay = val.to_i
-    end
-
-    def initial_network_retry_delay=(val)
-      @initial_network_retry_delay = val.to_i
-    end
 
     def open_timeout=(open_timeout)
       @open_timeout = open_timeout
@@ -71,13 +60,6 @@ module SiteImpact
       @read_timeout = read_timeout
     end
 
-    def write_timeout=(write_timeout)
-      unless Net::HTTP.instance_methods.include?(:write_timeout=)
-        raise NotImplementedError
-      end
-
-      @write_timeout = write_timeout
-    end
   end
 
 end

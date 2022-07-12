@@ -29,9 +29,15 @@ module SiteImpact
 
     def_delegators :@config, :counts_api_key, :counts_api_key=
     def_delegators :@config, :counts_base_url, :counts_base_url=
+    def_delegators :@config, :counts_username, :counts_username=
+    def_delegators :@config, :counts_password, :counts_password=
+    def_delegators :@config, :counts_client_id, :counts_client_id=
+    def_delegators :@config, :counts_client_secret, :counts_client_secret=
 
     def_delegators :@config, :reports_api_key, :reports_api_key=
     def_delegators :@config, :reports_base_url, :reports_base_url=
+
+    def_delegators :@config, :debug, :debug=
 
   end
 
