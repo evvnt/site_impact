@@ -4,34 +4,34 @@ module SiteImpact
   class Order
     class << self
       def create(opts = {})
-        self.client.post("orders", create_order_body(opts))
+        client.post('orders', create_order_body(opts))
       end
 
       def read(order_id)
-        self.client.get("orders/#{order_id}")
+        client.get("orders/#{order_id}")
       end
 
       def approve(order_id, opts)
-        self.client.post("orders/#{order_id}/approvals", {
-          data: {
-            broadcast_date: opts[:broadcast_date],
-            broadcast_time: opts[:broadcast_time],
-            broadcast_timezone: 1,
-          }
-        })
+        client.post("orders/#{order_id}/approvals",
+                    data: {
+                      broadcast_date: opts[:broadcast_date],
+                      broadcast_time: opts[:broadcast_time],
+                      broadcast_timezone: 1,
+                    }
+        )
       end
 
       def unapprove_order(order_id)
-        self.client.delete("orders/#{order_id}/approvals")
+        client.delete("orders/#{order_id}/approvals")
       end
 
       def search(params = {})
         params.slice!(:order_name, :po_number, :broadcast_date, :order_status_id, :order_type_id).compact
-        self.client.get("orders", params)
+        client.get('orders', params)
       end
 
       def test_connection
-        self.client.get("test")
+        client.get('test')
       end
 
       private
@@ -66,7 +66,7 @@ module SiteImpact
                   {
                     order_file_type_id: 2,
                     base64: opts[:email_content],
-                    file_name: "creative.zip"
+                    file_name: 'creative.zip'
                   }
                 ],
                 from_line: opts[:from_name],

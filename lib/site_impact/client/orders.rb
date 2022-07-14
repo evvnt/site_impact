@@ -8,13 +8,17 @@ module SiteImpact
         super(base_url: SiteImpact.orders_base_url)
       end
 
+      def success?(body)
+        body[:success]
+      end
+
       private
 
       def api_headers
         {
-          "api-key" => SiteImpact.orders_api_key,
-          "Content-Type" => "application/json",
-          "User-Agent" => "Ruby",
+          'api-key' => SiteImpact.orders_api_key,
+          'Content-Type' => 'application/json',
+          'User-Agent' => 'Ruby'
         }
       end
 

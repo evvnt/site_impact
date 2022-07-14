@@ -14,8 +14,7 @@ module SiteImpact
       end
 
       def execute(method:, endpoint:, payload: {}, headers: nil)
-        response = nil
-        headers = headers || api_headers
+        headers ||= api_headers
         headers[:params] = payload[:params] if payload.include? :params
         url = "#{@base_url}/#{endpoint.delete_prefix('/')}"
         request_options = {method: method,
@@ -23,7 +22,7 @@ module SiteImpact
                            headers: headers,
                            read_timeout: SiteImpact.config.read_timeout,
                            open_timeout: SiteImpact.config.open_timeout}
-        if [:post, :put].include? method
+        if %i[post put].include? method
           payload.delete :params
           request_options[:payload] = payload.to_json
         end
@@ -38,13 +37,16 @@ module SiteImpact
         body = JSON.parse(response, symbolize_names: true)
         puts "SiteImpact -- Response: #{body.inspect}" if SiteImpact.config.debug
 
-        # TODO: Create consistent response objects for each API
-        if body.is_a?(Hash) && body.has_key?(:success) && body[:success] == false
+        unless success?(body)
           message = "Unable to #{method.to_s.upcase} to endpoint: #{endpoint}. #{body[:errors]}"
           raise SiteImpact::ConnectionError.new(message, self)
         end
 
         body
+      end
+
+      def success?(body)
+        !body.nil?
       end
 
       def get(endpoint, params = {})
