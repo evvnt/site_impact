@@ -11,6 +11,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="rake (v13.0.6, ruby-2.3.7-p456) [gem]" level="application" />
+  </component>
+  <component name="RakeTasksCache">
+    <option name="myRootTask">
+      <RakeTaskImpl id="rake" />
+    </option>
   </component>
 </module>
