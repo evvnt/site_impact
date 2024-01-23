@@ -29,8 +29,24 @@ SiteImpact::Order.read(order.id)
 
 ### Counts
 ```ruby
-# TODO
+require 'site_impact'
+# Categories and interests
+categories = SiteImpact::Count.categories
+options = SiteImpact::Count.options(categories.first)
+# Created and get counts
+response = SiteImpact::Count.create_count(zip_code, radius, categories_collection)
+count = SiteImpact::Count.get(response['data']['id'], response['data']['version_id'])
 ```
+The Counts API requires a temporary auth token on each request. When making repeated requests with `SiteImapct::Count` it is more efficient to use an instance. The authentication request will only be run once:
+```ruby
+client = SiteImpact::Count.new
+radii = [10, 20, 30, 50, 80]
+
+radii.each do |radius|
+  client.create_count(zip_code, radius, categories_collection)
+end
+```
+
 
 ### Reports
 ```ruby
