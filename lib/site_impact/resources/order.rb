@@ -13,10 +13,12 @@ module SiteImpact
 
       def approve(order_id, opts)
         client.post("orders/#{order_id}/approvals",
-                    data: {
-                      broadcast_date: opts[:broadcast_date],
-                      broadcast_time: opts[:broadcast_time],
-                      broadcast_timezone: 1,
+                    {
+                      data: {
+                        broadcast_date: opts[:broadcast_date],
+                        broadcast_time: opts[:broadcast_time],
+                        broadcast_timezone: 1,
+                      }
                     }
         )
       end
