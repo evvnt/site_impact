@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rest-client"
+require "httparty"
 require "base64"
 require "cgi"
 require "uri"
@@ -8,38 +8,32 @@ require "uri"
 module SiteImpact
   module Client
     class Base
+      include HTTParty
+      debug_output STDOUT
 
       def initialize(base_url:, **params)
         @base_url = base_url.chomp("/")
       end
 
-      def execute(method:, endpoint:, payload: {}, headers: nil)
+      def execute(method:, endpoint:, query: nil, body: nil, headers: nil)
         headers ||= api_headers
-        headers[:params] = payload[:params] if payload.include? :params
         url = "#{@base_url}/#{endpoint.delete_prefix('/')}"
-        request_options = {method: method,
-                           url: url,
-                           headers: headers,
-                           read_timeout: SiteImpact.config.read_timeout,
-                           open_timeout: SiteImpact.config.open_timeout}
-        if %i[post put].include? method
-          payload.delete :params
-          request_options[:payload] = payload.to_json
-        end
-        puts "SiteImpact -- URL: #{url}, Request: #{request_options.inspect}" if SiteImpact.config.debug
+        options = {body: body&.to_json, query: query, headers: headers}.compact
+
+        puts "SiteImpact -- Request: URL: #{url}, Payload: #{options.inspect}" if SiteImpact.config.debug
 
         begin
-          response = ::RestClient::Request.execute(request_options)
-        rescue ::RestClient::ExceptionWithResponse => e
-          raise SiteImpact::ConnectionError.new(e.message, self)
+          response = HTTParty.public_send(method, url, options)
+        rescue => e
+          raise SiteImpact::ConnetionError, e.message
         end
-
+        puts response
         body = JSON.parse(response, symbolize_names: true)
         puts "SiteImpact -- Response: #{body.inspect}" if SiteImpact.config.debug
 
         unless success?(body)
-          message = "Unable to #{method.to_s.upcase} to endpoint: #{endpoint}. #{body[:errors]}"
-          raise SiteImpact::ConnectionError.new(message, self)
+          message = body.fetch(:message){ "Unable to complete Site Impact request." }
+          raise SiteImpact::Error.new(message, body[:errors], body)
         end
 
         body
@@ -50,16 +44,15 @@ module SiteImpact
       end
 
       def get(endpoint, params = {})
-        payload = {params: params}
-        execute(method: :get, endpoint: endpoint, payload: payload)
+        execute(method: :get, endpoint: endpoint, query: params)
       end
 
       def post(endpoint, payload = {})
-        execute(method: :post, endpoint: endpoint, payload: payload)
+        execute(method: :post, endpoint: endpoint, body: payload)
       end
 
       def put(endpoint, payload = {})
-        execute(method: :put, endpoint: endpoint, payload: payload)
+        execute(method: :put, endpoint: endpoint, body: payload)
       end
 
       def delete(endpoint)

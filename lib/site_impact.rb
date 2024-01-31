@@ -41,12 +41,13 @@ module SiteImpact
 
   end
 
-  class Error < StandardError; end
+  class ConnectionError < StandardError; end
 
-  class ConnectionError < StandardError
-    attr_reader :response
-    def initialize(message, response)
+  class Error < StandardError
+    attr_reader :errors, :response
+    def initialize(message, errors = [], response = nil)
       super(message)
+      @errors = errors
       @response = response
     end
   end
