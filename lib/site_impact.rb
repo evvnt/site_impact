@@ -38,6 +38,8 @@ module SiteImpact
     def_delegators :@config, :reports_base_url, :reports_base_url=
 
     def_delegators :@config, :debug, :debug=
+    def_delegators :@config, :open_timeout, :open_timeout=
+    def_delegators :@config, :read_timeout, :read_timeout=
 
   end
 

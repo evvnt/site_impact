@@ -9,9 +9,6 @@ module SiteImpact
   module Client
     class Base
       include HTTParty
-      debug_output SiteImpact.config.debug ? $stdout : $stderr
-      read_timeout SiteImpact.config.read_timeout
-      open_timeout SiteImpact.config.open_timeout
 
       def initialize(base_url:, **params)
         @base_url = base_url.chomp("/")
@@ -20,7 +17,12 @@ module SiteImpact
       def execute(method:, endpoint:, query: nil, body: nil, headers: nil)
         headers ||= api_headers
         url = "#{@base_url}/#{endpoint.delete_prefix('/')}"
-        options = {body: body&.to_json, query: query, headers: headers}.compact
+        options = {body: body&.to_json,
+                   query: query,
+                   headers: headers,
+                   open_timeout: SiteImpact.config.open_timeout,
+                   read_timeout: SiteImpact.config.read_timeout,
+                   debug_output: SiteImpact.config.debug ? $stdout : $stderr}.compact
 
         puts "SiteImpact -- Request: URL: #{url}, Payload: #{options.inspect}" if SiteImpact.config.debug
 
