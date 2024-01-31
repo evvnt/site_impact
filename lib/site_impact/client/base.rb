@@ -9,7 +9,9 @@ module SiteImpact
   module Client
     class Base
       include HTTParty
-      debug_output STDOUT
+      debug_output SiteImpact.config.debug ? $stdout : $stderr
+      read_timeout SiteImpact.config.read_timeout
+      open_timeout SiteImpact.config.open_timeout
 
       def initialize(base_url:, **params)
         @base_url = base_url.chomp("/")

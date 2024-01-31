@@ -73,7 +73,7 @@ module SiteImpact
                 ],
                 from_line: opts[:from_name],
                 opt_out_id: SiteImpact.orders_opt_out_id,
-                count_version_id: Rails.env.production? ? opts[:count_version_id] : 1423476, # Outside production we have to use this count ID,
+                count_version_id: opts[:count_version_id],
                 use_auto_testing: true
               }
             ]
