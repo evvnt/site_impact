@@ -50,7 +50,13 @@ end
 
 ### Reports
 ```ruby
-# TODO
+require 'site_impact'
+SiteImpact.reports_base_url = 'http://sandbox.ecampaignstats.com/cp/index.php/report_api/?WSDL'
+SiteImpact.reports_api_key = '[Your Reports Key]'
+
+start_time = 90.days.ago
+report = ::SiteImpact::Report.get_client_report(start_time)
+puts "Your campaign has #{report.opens} opens, #{report.clicks} unique clicks and a broadcast date of #{report.broadcast_time}"
 ```
 
 ## Development
