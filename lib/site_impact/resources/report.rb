@@ -15,7 +15,6 @@ module SiteImpact
                                                      :diffgram,
                                                      :new_data_set,
                                                      :table)
-
         [results].flatten.map do |result|
           OpenStruct.new(
             site_impact_order_id: result[:campaign_x0020_id].to_i,

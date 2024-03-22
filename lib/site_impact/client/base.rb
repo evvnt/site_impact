@@ -59,6 +59,10 @@ module SiteImpact
         execute(method: :put, endpoint: endpoint, body: payload)
       end
 
+      def patch(endpoint, payload = {})
+        execute(method: :patch, endpoint: endpoint, body: payload)
+      end
+
       def delete(endpoint)
         execute(method: :delete, endpoint: endpoint)
       end
