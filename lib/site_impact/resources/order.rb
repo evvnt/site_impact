@@ -104,7 +104,7 @@ module SiteImpact
               from_line: opts[:from_name],
               count_version_id: opts[:count_version_id],
             },
-            retest: true,
+            retest: opts.fetch(:retest){ false },
             comments: ""
           }
         }
