@@ -86,24 +86,28 @@ module SiteImpact
       end
 
       def update_order_body(opts)
+        changes = {
+          order_name: opts[:order_name],
+          broadcast_date: opts[:broadcast_date],
+          broadcast_time: opts[:broadcast_time],
+          quantity: opts[:quantity],
+          subject_line: opts[:subject_line],
+          po_number: opts[:po_number],
+          from_line: opts[:from_name],
+          count_version_id: opts[:count_version_id],
+        }.compact
+        if opts[:email_content]
+          changes[:files] = [
+            {
+              order_file_type_id: 2,
+              base64: opts[:email_content],
+              file_name: "creative.zip"
+            }
+          ]
+        end
         {
           data: {
-            changes: {
-              order_name: opts[:order_name],
-              broadcast_date: opts[:broadcast_date],
-              broadcast_time: opts[:broadcast_time],
-              quantity: opts[:quantity],
-              subject_line: opts[:subject_line],
-              files: [
-                {
-                  order_file_type_id: 2,
-                  base64: opts[:email_content],
-                  file_name: "creative.zip"
-                }
-              ],
-              from_line: opts[:from_name],
-              count_version_id: opts[:count_version_id],
-            },
+            changes: changes,
             retest: opts.fetch(:retest){ false },
             comments: ""
           }
