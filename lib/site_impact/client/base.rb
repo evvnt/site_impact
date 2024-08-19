@@ -29,7 +29,7 @@ module SiteImpact
         begin
           response = HTTParty.public_send(method, url, options)
         rescue => e
-          raise SiteImpact::ConnetionError, e.message
+          raise SiteImpact::ConnectionError, e.message
         end
         puts response
         body = JSON.parse(response, symbolize_names: true)
