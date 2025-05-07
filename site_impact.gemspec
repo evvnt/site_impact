@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Uncomment to register a new dependency of your gem
-  spec.add_runtime_dependency 'savon', '~> 2.12.1'
+  spec.add_runtime_dependency 'savon', '~> 2.15.1'
   spec.add_runtime_dependency 'httparty', '~> 0.21.0'
   spec.add_development_dependency "bundler", "~> 2.0"
 
