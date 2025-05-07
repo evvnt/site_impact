@@ -1,5 +1,4 @@
 require "spec_helper"
-require "pry"
 
 RSpec.describe SiteImpact::Report do
   let(:report_endpoint) {
