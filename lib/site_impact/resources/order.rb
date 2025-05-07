@@ -4,7 +4,11 @@ module SiteImpact
   class Order
     class << self
       def create(opts = {})
-        client.post('orders', create_order_body(opts))
+        client.post("orders", create_order_body(opts))
+      end
+
+      def update(order_id, opts = {})
+        client.patch("orders/#{order_id}", update_order_body(opts))
       end
 
       def read(order_id)
@@ -29,11 +33,11 @@ module SiteImpact
 
       def search(params = {})
         params.slice!(:order_name, :po_number, :broadcast_date, :order_status_id, :order_type_id).compact
-        client.get('orders', params)
+        client.get("orders", params)
       end
 
       def test_connection
-        client.get('test')
+        client.get("test")
       end
 
       private
@@ -68,7 +72,7 @@ module SiteImpact
                   {
                     order_file_type_id: 2,
                     base64: opts[:email_content],
-                    file_name: 'creative.zip'
+                    file_name: "creative.zip"
                   }
                 ],
                 from_line: opts[:from_name],
@@ -80,6 +84,36 @@ module SiteImpact
           }
         }
       end
+
+      def update_order_body(opts)
+        changes = {
+          order_name: opts[:order_name],
+          broadcast_date: opts[:broadcast_date],
+          broadcast_time: opts[:broadcast_time],
+          quantity: opts[:quantity],
+          subject_line: opts[:subject_line],
+          po_number: opts[:po_number],
+          from_line: opts[:from_name],
+          count_version_id: opts[:count_version_id],
+        }.compact
+        if opts[:email_content]
+          changes[:files] = [
+            {
+              order_file_type_id: 2,
+              base64: opts[:email_content],
+              file_name: "creative.zip"
+            }
+          ]
+        end
+        {
+          data: {
+            changes: changes,
+            retest: opts.fetch(:retest){ false },
+            comments: ""
+          }
+        }
+      end
+
     end
   end
 end
