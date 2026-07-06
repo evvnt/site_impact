@@ -37,7 +37,7 @@ options = SiteImpact::Count.options(categories.first)
 response = SiteImpact::Count.create_count(zip_code, radius, categories_collection)
 count = SiteImpact::Count.get(response['data']['id'], response['data']['version_id'])
 ```
-The Counts API requires a temporary auth token on each request. When making repeated requests with `SiteImapct::Count` it is more efficient to use an instance. The authentication request will only be run once:
+The [Counts API](https://counts.siteimpact.com/api/documentation) has two methods of authentication. You can generate an access token in the Counts System: Clients, or you can generate a token using the OAuth2 Password Grant using the Get Access Token endpoint detailed below. When using the access token endpoint, a temporary auth token is required on each request. When making repeated requests with `SiteImapct::Count` it is more efficient to use an instance. The authentication request will only be run once:
 ```ruby
 client = SiteImpact::Count.new
 radii = [10, 20, 30, 50, 80]
@@ -45,8 +45,12 @@ radii = [10, 20, 30, 50, 80]
 radii.each do |radius|
   client.create_count(zip_code, radius, categories_collection)
 end
-```
 
+```
+When using a pre-defined access token:
+```ruby
+client = SiteImpact::Count.new(auth_token: ENV['MY_ACCESS_TOKEN'])
+```
 
 ### Reports
 ```ruby

@@ -100,6 +100,53 @@ RSpec.describe SiteImpact::Client::Counts do
     end
   end
 
+  describe "with a caller-supplied auth_token" do
+    it "uses the given token immediately without hitting the OAuth endpoint" do
+      stub_check
+
+      static_client = described_class.new(auth_token: "static-token")
+      static_client.get("/api/counts/count-1/check")
+
+      expect(a_request(:post, "#{base_url}/oauth/token")).not_to have_been_made
+      expect(a_request(:get, "#{base_url}/api/counts/count-1/check")
+        .with(headers: {"Authorization" => "Bearer static-token"})).to have_been_made.once
+    end
+
+    [401, 403].each do |status|
+      it "falls back to OAuth if the static token is rejected with a #{status}" do
+        static_client = described_class.new(auth_token: "static-token")
+
+        stub_request(:get, "#{base_url}/api/counts/count-1/check")
+          .with(headers: {"Authorization" => "Bearer static-token"})
+          .to_return(status: status, body: {}.to_json)
+
+        stub_token(access_token: "oauth-token")
+        stub_request(:get, "#{base_url}/api/counts/count-1/check")
+          .with(headers: {"Authorization" => "Bearer oauth-token"})
+          .to_return(status: 200, body: {status: "Successful", count: 7}.to_json)
+
+        resp = static_client.get("/api/counts/count-1/check")
+
+        expect(resp[:count]).to eq(7)
+        expect(a_request(:post, "#{base_url}/oauth/token")).to have_been_made.once
+      end
+    end
+
+    it "never proactively re-authenticates, no matter how much time passes" do
+      now = Time.now
+      allow(Time).to receive(:now).and_return(now)
+      static_client = described_class.new(auth_token: "static-token")
+      stub_check
+
+      allow(Time).to receive(:now).and_return(now + 86400)
+      static_client.get("/api/counts/count-1/check")
+
+      expect(a_request(:post, "#{base_url}/oauth/token")).not_to have_been_made
+      expect(a_request(:get, "#{base_url}/api/counts/count-1/check")
+        .with(headers: {"Authorization" => "Bearer static-token"})).to have_been_made.once
+    end
+  end
+
   def client
     @client ||= described_class.new
   end

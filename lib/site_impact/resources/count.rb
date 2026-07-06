@@ -42,9 +42,9 @@ module SiteImpact
 
     attr_reader :client
 
-    # Provide a instance version of this so repeated calls can be made without re-running `authenticate` on the client
-    def initialize
-      @client = SiteImpact::Client::Counts.new
+    # Provide an instance version of this so repeated calls can be made without re-running `authenticate` on the client
+    def initialize(auth_token: nil)
+      @client = SiteImpact::Client::Counts.new(auth_token: auth_token)
     end
 
     def categories

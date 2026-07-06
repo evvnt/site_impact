@@ -81,7 +81,7 @@ module SiteImpact
       # unauthenticated response and #reauthenticate! to act on it. Clients with no concept of an
       # expiring token (e.g. Client::Orders, which sends a static api-key) leave these as no-ops.
       def unauthenticated?(response)
-        response.code == 401
+        [401, 403].include?(response.code)
       end
 
       def reauthenticate!

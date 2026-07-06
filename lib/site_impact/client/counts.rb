@@ -7,11 +7,16 @@ module SiteImpact
       # doesn't cross the expiry boundary and get rejected mid-poll.
       TOKEN_REFRESH_BUFFER = 10
 
-      def initialize(**params)
-        @auth_token = nil
+      # A caller-supplied `auth_token` (e.g. one generated in the Counts System dashboard) is used
+      # as-is and skips the initial OAuth handshake. We don't track an expiry for it — these
+      # clients are short-lived (a single job run), so a proactive TTL-based refresh would never
+      # trigger in practice. If it's actually invalid/expired, the reactive 401/403 handling in
+      # Base#execute (see #reauthenticate!) falls back to a real OAuth handshake on first use.
+      def initialize(auth_token: nil, **params)
+        @auth_token = auth_token
         @token_expires_at = nil
         super(base_url: SiteImpact.counts_base_url)
-        authenticate
+        authenticate unless @auth_token
       end
 
       private
