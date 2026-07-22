@@ -40,7 +40,11 @@ module SiteImpact
           return execute(method: method, endpoint: endpoint, query: query, body: body, headers: nil, allow_reauth: false)
         end
 
-        body = JSON.parse(response, symbolize_names: true)
+        # Parse `response.body` (always the raw String), not `response` itself: HTTParty
+        # auto-parses the body into a Hash whenever the server sets a JSON Content-Type (the
+        # OAuth token endpoint does; /api/counts doesn't), and at that point `response` is no
+        # longer string-coercible, so passing it directly to JSON.parse raises a TypeError.
+        body = JSON.parse(response.body, symbolize_names: true)
         puts "SiteImpact -- Response: #{body.inspect}" if SiteImpact.config.debug
 
         unless success?(body)

@@ -36,6 +36,22 @@ RSpec.describe SiteImpact::Client::Counts do
       expect(a_request(:get, "#{base_url}/api/counts/count-1/check")
         .with(headers: {"Authorization" => "Bearer token-1"})).to have_been_made.once
     end
+
+    # Regression test: the real OAuth token endpoint sets a JSON Content-Type, unlike
+    # /api/counts (see the comment on `stub_token` above). HTTParty auto-parses the body into a
+    # Hash whenever it sees that header, and at that point the HTTParty::Response wrapper is no
+    # longer string-coercible — `JSON.parse(response, ...)` used to raise a TypeError here even
+    # though the identical code path worked fine for endpoints without a JSON Content-Type.
+    it "authenticates when the token endpoint sets a JSON Content-Type header" do
+      stub_request(:post, "#{base_url}/oauth/token")
+        .to_return(status: 200, body: {access_token: "token-1"}.to_json, headers: {"Content-Type" => "application/json"})
+      stub_check
+
+      client.get("/api/counts/count-1/check")
+
+      expect(a_request(:get, "#{base_url}/api/counts/count-1/check")
+        .with(headers: {"Authorization" => "Bearer token-1"})).to have_been_made.once
+    end
   end
 
   describe "reuse across multiple polls" do
