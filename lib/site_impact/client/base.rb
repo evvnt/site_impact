@@ -59,7 +59,14 @@ module SiteImpact
         execute(method: :get, endpoint: endpoint, query: params)
       end
 
-      def post(endpoint, payload = {}, headers: nil, allow_reauth: true)
+      # `payload` is intentionally required (no `= {}` default): Ruby 2.7's legacy
+      # positional/keyword-argument separation reinterprets a trailing Hash-shaped argument as
+      # keyword arguments whenever the callee declares keyword params, even when an optional
+      # positional slot would fit it — it doesn't check whether the hash's keys actually match a
+      # keyword name. That breaks `post(endpoint, some_hash)` under Ruby 2.7 (though not 3.x) with
+      # "unknown keywords" once `headers:`/`allow_reauth:` were added. Requiring `payload` removes
+      # the ambiguity Ruby is resolving. Every call site already passes it, so this is a no-op.
+      def post(endpoint, payload, headers: nil, allow_reauth: true)
         execute(method: :post, endpoint: endpoint, body: payload, headers: headers, allow_reauth: allow_reauth)
       end
 

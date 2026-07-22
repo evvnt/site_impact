@@ -147,6 +147,25 @@ RSpec.describe SiteImpact::Client::Counts do
     end
   end
 
+  describe "#post" do
+    # Regression test: on Ruby 2.7, a method with keyword params (`headers:`, `allow_reauth:`)
+    # and an *optional* positional parameter reinterprets a trailing Hash-shaped positional
+    # argument as keyword arguments instead of binding it positionally, even when none of its
+    # keys match a real keyword name. `create_count`'s body (`type:`, `groups:`, `settings:`)
+    # used to trip this and raise "unknown keywords" only under Ruby 2.7, not 3.x.
+    it "sends an arbitrary body hash as the request payload rather than as keyword arguments" do
+      stub_token(access_token: "token-1")
+      stub_request(:post, "#{base_url}/api/counts")
+        .to_return(status: 200, body: {data: {count_id: 1, version_id: 2}}.to_json)
+
+      resp = client.post("/api/counts", {type: "consumer", groups: {}, settings: {name: "api1"}})
+
+      expect(resp[:data][:count_id]).to eq(1)
+      expect(a_request(:post, "#{base_url}/api/counts")
+        .with(body: {type: "consumer", groups: {}, settings: {name: "api1"}}.to_json)).to have_been_made.once
+    end
+  end
+
   def client
     @client ||= described_class.new
   end
